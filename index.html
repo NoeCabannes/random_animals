@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réseau de points interactif</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: black;
+        overflow: hidden;
+    }
+    canvas {
+        display: block;
+    }
+</style>
+</head>
+<body>
+<canvas id="networkCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('networkCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const points = [];
+const NUM_POINTS = 50;
+const CONNECT_DISTANCE = 100;
+
+// Fonction pour dessiner un point
+function drawPoint(x, y) {
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(x, y, 2, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// Fonction pour dessiner une ligne entre deux points
+function drawLine(startX, startY, endX, endY) {
+    ctx.strokeStyle = 'white';
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+}
+
+// Fonction pour initialiser les points et les connexions
+function init() {
+    // Trouver le milieu du canvas
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    for (let i = 0; i < NUM_POINTS; i++) {
+        // Générer des coordonnées aléatoires autour du centre
+        const angle = Math.random() * Math.PI * 2; // Angle aléatoire
+        const radius = Math.random() * (canvas.width / 4); // Rayon aléatoire jusqu'à un quart du canvas
+
+        // Calculer les coordonnées du point
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+
+        points.push({ x, y });
+    }
+}
+
+// Fonction pour mettre à jour les connexions entre les points
+function update() {
+    for (let i = 0; i < points.length; i++) {
+        for (let j = i + 1; j < points.length; j++) {
+            const distance = Math.sqrt(
+                Math.pow(points[i].x - points[j].x, 2) +
+                Math.pow(points[i].y - points[j].y, 2)
+            );
+
+            if (distance < CONNECT_DISTANCE) {
+                drawLine(points[i].x, points[i].y, points[j].x, points[j].y);
+            }
+        }
+    }
+}
+
+// Initialisation
+init();
+update();
+
+// Gestionnaire d'événement pour suivre la souris avec un point blanc
+canvas.addEventListener('mousemove', (e) => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    // Effacer le canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Redessiner les points et les connexions
+    update();
+
+    // Dessiner le point blanc à la position de la souris
+    drawPoint(mouseX, mouseY);
+});
+</script>
+
+</body>
+</html>
